@@ -213,6 +213,7 @@ Project references:
 - **Solution format**: `.slnx`, not `.sln`. Use `ProgramDesigner.slnx` in `dotnet` commands.
 - **CORS**: The API uses a named `"DevFrontend"` policy. Allowed origins are read from `Cors:AllowedOrigins` in `appsettings.Development.json` (default: `["http://localhost:4200"]`). This is dev-only and must be tightened for production.
 - **Frontend API base URL**: Configured in `frontend/src/environments/environment.development.ts` → `apiBaseUrl: 'http://localhost:5173'`. Must match the `applicationUrl` in `launchSettings.json`.
+- **Known Programs Cache**: The Angular app persists a light history of successfully created or loaded programs to localStorage under the key `programDesigner.knownPrograms`. This is for client-side search/UX only and does not involve the backend.
 
 ## 8. Status
 
@@ -228,3 +229,4 @@ Project references:
 - [x] Story 10 - Frontend Scaffold, CORS & API Client ✅ (Angular 19, builds clean, `ProgramApiService` typed against real DTOs)
 - [x] Story 11 - Program Builder & Viewer UI ✅ (BuilderPageComponent + NodeEditorComponent + ViewerPageComponent, builds clean, 23/23 .NET tests still pass)
 - [x] Story 12 - Validation Results UI ✅ (Validate button, Simulation panel, issues display)
+- [x] Story 13 - LocalStorage "Known Programs" Cache & Search ✅ (ProgramHistoryService, Search Box in Header)

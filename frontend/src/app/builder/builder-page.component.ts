@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProgramApiService } from '../core/program-api.service';
+import { ProgramHistoryService } from '../core/program-history.service';
 import { NodeEditorComponent } from './node-editor.component';
 import {
   FormNode,
@@ -186,7 +187,7 @@ export class BuilderPageComponent {
   error = signal<string | null>(null);
   submitting = signal(false);
 
-  constructor(private api: ProgramApiService, private router: Router) {}
+  constructor(private api: ProgramApiService, private router: Router, private historyService: ProgramHistoryService) {}
 
   /** Reactive flat list of all nodes — used for prerequisite dropdowns */
   allNodes = signal<FormNode[]>([]);
@@ -266,6 +267,7 @@ export class BuilderPageComponent {
     this.api.createProgram(request).subscribe({
       next: (program) => {
         this.submitting.set(false);
+        this.historyService.recordProgram(program.id, program.name);
         this.router.navigate(['/programs', program.id]);
       },
       error: (err) => {

@@ -2,6 +2,38 @@
   <div class="header-inner">
     <span class="logo-mark" aria-hidden="true">✦</span>
     <h1 class="app-title">ProgramDesigner</h1>
+
+    <!-- Search Box -->
+    <div class="search-container">
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Find a program..." 
+        [(ngModel)]="searchTerm" 
+        (focus)="onSearchFocus()" 
+        (blur)="onSearchBlur()" 
+      />
+      
+      @if (isSearchFocused()) {
+        <div class="search-dropdown">
+          @if (knownPrograms().length === 0) {
+            <div class="search-empty">No recent programs yet — create one to get started.</div>
+          } @else if (filteredPrograms().length === 0) {
+            <div class="search-empty">No matching programs found.</div>
+          } @else {
+            <ul class="search-results">
+              @for (p of filteredPrograms(); track p.id) {
+                <li (mousedown)="selectProgram(p)">
+                  <div class="result-name">{{ p.name }}</div>
+                  <div class="result-date">Created {{ p.createdAt | date:'short' }}</div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </div>
+
     <nav class="app-nav">
       <a routerLink="/builder" routerLinkActive="nav-active" class="nav-link">Builder</a>
     </nav>

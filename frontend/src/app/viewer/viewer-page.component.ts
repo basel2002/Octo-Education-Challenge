@@ -12,6 +12,7 @@ import {
   SimulationRequest,
   SimulationNodeResult
 } from '../core/api.models';
+import { ProgramHistoryService } from '../core/program-history.service';
 
 @Component({
   selector: 'app-viewer-page',
@@ -24,13 +25,6 @@ import {
       <div class="page-header">
         <h2>Program Viewer</h2>
         <a class="btn-secondary" routerLink="/builder">← New Program</a>
-      </div>
-
-      <!-- Jump to ID -->
-      <div class="id-row">
-        <span class="field-label">Program ID</span>
-        <input class="id-input" [(ngModel)]="inputId" placeholder="Paste a program ID…" />
-        <button class="btn-primary-sm" (click)="loadById()">Load</button>
       </div>
 
       @if (loading()) {
@@ -404,7 +398,6 @@ export class ViewerPageComponent implements OnInit {
   program = signal<ProgramResponse | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
-  inputId = '';
   
   validation = signal<ValidationResultResponse | null>(null);
   validating = signal(false);
@@ -423,23 +416,17 @@ export class ViewerPageComponent implements OnInit {
   constructor(
     private api: ProgramApiService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private historyService: ProgramHistoryService
   ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.inputId = id;
         this.load(id);
       }
     });
-  }
-
-  loadById(): void {
-    const id = this.inputId.trim();
-    if (!id) return;
-    this.router.navigate(['/programs', id]);
   }
 
   private load(id: string): void {
@@ -454,6 +441,7 @@ export class ViewerPageComponent implements OnInit {
       next: (p) => {
         this.loading.set(false);
         this.program.set(p);
+        this.historyService.recordProgram(p.id, p.name);
         this.extractNodes(p.rootGroup);
       },
       error: (err) => {
