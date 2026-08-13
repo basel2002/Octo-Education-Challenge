@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ProgramDesigner.Api/ProgramDesigner.Api.csproj" />
+    <Project Path="src/ProgramDesigner.Core/ProgramDesigner.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ProgramDesigner.Tests/ProgramDesigner.Tests.csproj" />
+  </Folder>
+</Solution>
