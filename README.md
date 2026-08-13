@@ -265,4 +265,4 @@ Antigravity (an AI coding agent) was used to implement both the backend and fron
 ![Validation Results]
 <img width="1317" height="329" alt="image" src="https://github.com/user-attachments/assets/fd500135-31a7-44b5-a905-45fcc2008f75" />
 
-*Reachability warning detection.*
+
