@@ -252,11 +252,14 @@ Antigravity (an AI coding agent) was used to implement both the backend and fron
 
 ## Screenshots
 
-![Program Builder](docs/screenshots/builder.png)
+![Program Builder](<img width="1073" height="913" alt="image" src="https://github.com/user-attachments/assets/5b9e81ee-189f-4816-9c9e-cc12392e855b" />
+)
 *Visual program tree builder.*
 
-![Program Viewer](docs/screenshots/viewer.png)
+![Program Viewer]<img width="1292" height="909" alt="image" src="https://github.com/user-attachments/assets/5188f3d5-9d5c-485e-860f-2944e7599b14" />
+)
 *Program tree viewer and simulation UI.*
 
-![Validation Results](docs/screenshots/validation.png)
+![Validation Results](<img width="1317" height="329" alt="image" src="https://github.com/user-attachments/assets/fd500135-31a7-44b5-a905-45fcc2008f75" />
+)
 *Reachability warning detection.*
