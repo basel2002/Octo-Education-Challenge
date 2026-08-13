@@ -16,7 +16,6 @@ public sealed record ImpossiblePrerequisiteResponse
     public required string NodeName { get; init; }
     public required Guid PrerequisiteId { get; init; }
     public required string PrerequisiteName { get; init; }
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public required ImpossiblePrerequisiteReason Reason { get; init; }
     public required string Description { get; init; }
 }

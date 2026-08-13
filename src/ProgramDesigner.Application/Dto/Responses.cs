@@ -28,7 +28,6 @@ public sealed record StepNodeResponse : ProgramNodeResponse
 
 public sealed record GroupNodeResponse : ProgramNodeResponse
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public required GroupRule GroupRule { get; init; }
     
     public int? PickCount { get; init; }

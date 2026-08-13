@@ -38,3 +38,7 @@ yarn-error.log
 
 # Angular
 .angular/
+
+# AI Working Files
+PROJECT_CONTEXT.md
+AUDIT_REPORT.md

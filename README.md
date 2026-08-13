@@ -1,153 +1,71 @@
-<div align="center">
-  <h1>🚀 ProgramDesigner</h1>
-  <p><strong>A .NET 10 Web API and Angular 19 SPA for modeling education programs.</strong></p>
-  
-  [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-  [![Angular 19](https://img.shields.io/badge/Angular-19.0-DD0031?logo=angular)](https://angular.io/)
-  [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
-</div>
+# ProgramDesigner
 
-<hr/>
+## Overview
+ProgramDesigner is an education-management tool designed for education program designers. It allows users to visually compose, validate, and simulate complex program structures, such as a university curriculum or a corporate training track. Programs are built as a hierarchical tree of concrete steps (like sessions or tests) and logical groups (such as in-order sequences or pick-N choices), with support for strict prerequisite rules.
 
-## ✨ Overview
-
-ProgramDesigner is a full-stack application (Backend: **.NET 10 Web API**, Frontend: **Angular 19 SPA**) designed for modeling education programs as a recursive tree of steps and groups. 
-
-A program can contain concrete activities such as *sessions, tests, and submissions*, plus nested groups that require either ordered completion (`InOrder`) or a choice among options (`Choice`). Nodes can depend on other nodes through prerequisites. The core engine features:
-- **Validation:** Catches impossible prerequisites (self-references, forward-references, cycles).
-- **Reachability Warnings:** Warns when a prerequisite may be unreachable because it lives inside a choice branch the participant might not pick.
-- **Simulation:** An engine that computes one participant's current progress state from their selected choice paths and completed steps.
-- **Interactive UI:** A beautiful web interface to compose program trees, visualize structures recursively, run the validation engine, and dynamically test simulations.
-
----
-
-## 🤖 AI Tool Usage Note
-
-This project was built using AI collaboration tools:
-- **Claude** was used for high-level thinking, architecture design, and planning.
-- **Antigravity** (Google DeepMind's agentic coding assistant) was used for direct code implementation, scaffolding, testing, and debugging.
-
----
-
-## 🛠️ Setup Instructions
-
+## Setup & Run Instructions
 **Prerequisites:**
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [Node.js](https://nodejs.org/en/) (v22.x or v24.x)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download)
+- [Node.js](https://nodejs.org/) (LTS recommended, e.g., v20+)
+- [Angular CLI](https://angular.io/cli) (v19.2.27 or higher)
 
-### 1. Start the .NET Backend API
-
-```bash
-# Clone the repository
-git clone <repo-url>
-cd ProgramDesigner
-
-# Restore and build the solution
+**1. Run the API:**
+Open a terminal in the repository root and run:
+```powershell
 dotnet restore ProgramDesigner.slnx
-dotnet build ProgramDesigner.slnx
-
-# Run the API
-dotnet run --project src\ProgramDesigner.Api\ProgramDesigner.Api.csproj --launch-profile http
+dotnet run --project src\ProgramDesigner.Api\ProgramDesigner.Api.csproj
 ```
-The API will run at `http://localhost:5173`.
+*The API will start and listen on `http://localhost:5173`.*
 
-### 2. Start the Angular Frontend
+**2. Run the Test Suite:**
+Open a separate terminal in the repository root and run:
+```powershell
+dotnet test ProgramDesigner.slnx
+```
+*Expect 23 tests to pass successfully.*
 
-In a new terminal window:
-```bash
+**3. Run the Frontend:**
+Open a separate terminal, navigate to the `frontend` folder, and start the development server:
+```powershell
 cd frontend
 npm install
 npm start
 ```
-The Web App will run at `http://localhost:4200`.
+*The frontend will be available at `http://localhost:4200` and is configured via `environment.development.ts` to automatically route API calls to `http://localhost:5173`.*
 
-### 3. Run the Test Suite
-The .NET backend is heavily tested. To run the suite:
-```bash
-dotnet test ProgramDesigner.slnx
-```
+## Data Model Explanation
+The domain model is built as a recursive, generic tree of components:
+- **`ProgramNode`**: The abstract base class representing any node in the program.
+- **`StepNode`**: A leaf node representing a concrete activity (e.g., a "session" or "test").
+- **`GroupNode`**: A container node that holds other nodes and applies a completion rule (either `inOrder` or `choice`).
+- **`EducationProgram`**: The aggregate root that manages the overall program and enforces structural invariants.
 
----
+When parsing JSON, the API uses a discriminator field (`"type": "step"` or `"type": "group"`) to dynamically reconstruct the polymorphic `children` arrays.
 
-## 🏗️ Domain Data Model
-
-The core model is generic and recursive, allowing it to represent *any* program tree.
-
-```mermaid
-classDiagram
-    class EducationProgram {
-        +Guid Id
-        +string Name
-        +GroupNode RootGroup
-    }
-    
-    class ProgramNode {
-        <<abstract>>
-        +Guid Id
-        +string Name
-        +NodeType NodeType
-        +Guid? PrerequisiteId
-    }
-    
-    class GroupNode {
-        +GroupRule GroupRule
-        +int? PickCount
-        +List~ProgramNode~ Children
-    }
-    
-    class StepNode {
-        +string StepType
-    }
-    
-    EducationProgram *-- GroupNode : RootGroup
-    ProgramNode <|-- GroupNode
-    ProgramNode <|-- StepNode
-    GroupNode *-- ProgramNode : Children
-```
-
-- `EducationProgram` is the aggregate root.
-- `StepNode` is a leaf activity with a free-form `stepType` (e.g., session, test).
-- `GroupNode` contains child nodes and has a `groupRule` (`InOrder` or `Choice`).
-- `PrerequisiteId` is a stored Guid reference gating access to a node and its subtree.
-
----
-
-## 🔌 API Contract Overview
-
-All API JSON communication uses `camelCase`. The node types are discriminated polymorphically via a `type` property.
-
-### `POST /programs`
-Creates and stores a program in memory. Clients pass `key` as a string, and `prerequisiteRef` to map dependencies easily.
-* **Returns:** `201 Created` with the mapped tree and system-generated IDs.
-* **Validates:** Rejects malformed structures (e.g., duplicate keys, invalid pick counts).
-
-**Example Request:**
+**Example nested payload:**
 ```json
 {
-  "name": "Computer Science",
+  "name": "Computer Science Degree",
   "rootGroup": {
-    "name": "Computer Science",
+    "name": "Core Curriculum",
     "groupRule": "inOrder",
     "children": [
       {
-        "type": "group",
-        "key": "Foundations",
-        "name": "Foundations",
-        "groupRule": "inOrder",
-        "children": [
-          { "type": "step", "name": "Intro to Computing", "stepType": "session" }
-        ]
+        "type": "step",
+        "name": "Intro to Programming",
+        "stepType": "session"
       },
       {
         "type": "group",
-        "key": "Major",
-        "name": "Major",
+        "name": "Major Selection",
         "groupRule": "choice",
         "pickCount": 1,
-        "prerequisiteRef": "Foundations",
         "children": [
-          { "type": "step", "name": "AI", "stepType": "session" },
-          { "type": "step", "name": "IT", "stepType": "session" }
+          {
+            "type": "step",
+            "name": "AI Capstone",
+            "stepType": "test"
+          }
         ]
       }
     ]
@@ -155,107 +73,190 @@ Creates and stores a program in memory. Clients pass `key` as a string, and `pre
 }
 ```
 
-### `GET /programs/{id}`
-Retrieves a full recursive program tree by ID.
-* **Returns:** `200 OK`
+## API Contract
 
-**Example Response:**
+**1. Create a Program**
+- **Method:** `POST /programs`
+- **Request Body:** JSON representing the program. Clients use a temporary `key` to identify nodes for prerequisite references (`prerequisiteRef`) before the server generates GUIDs.
+- **Status:** 201 Created (or 400 Bad Request for structural violations).
 ```json
 {
-  "id": "11111111-1111-1111-1111-111111111111",
-  "name": "Computer Science",
+  "name": "Computer Science Degree",
   "rootGroup": {
-    "id": "22222222-2222-2222-2222-222222222222",
-    "name": "Computer Science",
+    "name": "Root",
     "groupRule": "inOrder",
-    "children": []
+    "children": [
+      {
+        "type": "group",
+        "name": "Major",
+        "groupRule": "choice",
+        "pickCount": 1,
+        "key": "major",
+        "children": [
+          {
+            "type": "group",
+            "name": "AI",
+            "groupRule": "inOrder",
+            "children": [
+              { "type": "step", "name": "AI Capstone", "stepType": "test", "key": "aiCapstone" }
+            ]
+          }
+        ]
+      },
+      { 
+        "type": "step", 
+        "name": "Final Capstone", 
+        "stepType": "test", 
+        "key": "finalCapstone", 
+        "prerequisiteRef": "major" 
+      }
+    ]
   }
 }
 ```
 
-### `POST /programs/{id}/validate`
-Validates a program's structure for prerequisite issues.
-* **Returns:** `isValid` boolean, `impossiblePrerequisites` (blocking errors), and `reachabilityWarnings` (advisory warnings).
+**2. Get a Program**
+- **Method:** `GET /programs/{id}`
+- **Response Body:** The stored program tree with resolved GUIDs.
+- **Status:** 200 OK (or 404 Not Found).
+```json
+{
+  "id": "e0b7a8a1-c052-4afc-a634-1188478d10ed",
+  "name": "Computer Science Degree",
+  "rootGroup": {
+    "groupRule": "inOrder",
+    "pickCount": null,
+    "children": [
+      {
+        "type": "group",
+        "groupRule": "choice",
+        "pickCount": 1,
+        "children": [
+          {
+            "type": "group",
+            "groupRule": "inOrder",
+            "pickCount": null,
+            "children": [
+              {
+                "type": "step",
+                "stepType": "test",
+                "id": "7662c575-b873-455a-b9c1-487ad048f0e3",
+                "name": "AI Capstone",
+                "prerequisiteId": null,
+                "prerequisiteName": null
+              }
+            ],
+            "id": "27680bb0-54ec-4286-9a25-c637a77e2ffb",
+            "name": "AI",
+            "prerequisiteId": null,
+            "prerequisiteName": null
+          }
+        ],
+        "id": "f516a738-dbb4-4b53-a128-4ef9c5f8742b",
+        "name": "Major",
+        "prerequisiteId": null,
+        "prerequisiteName": null
+      },
+      {
+        "type": "step",
+        "stepType": "test",
+        "id": "e14b8a24-9b57-45eb-89da-2244243b9ce7",
+        "name": "Final Capstone",
+        "prerequisiteId": "f516a738-dbb4-4b53-a128-4ef9c5f8742b",
+        "prerequisiteName": "Major"
+      }
+    ],
+    "id": "4eec3b5e-04f8-4a92-be20-569611db844e",
+    "name": "Root",
+    "prerequisiteId": null,
+    "prerequisiteName": null
+  }
+}
+```
 
-**Example Response (Valid but Risky):**
+**3. Validate a Program**
+- **Method:** `POST /programs/{id}/validate`
+- **Response Body:** Analysis of the prerequisite structure.
+- **Status:** 200 OK (or 404 Not Found).
 ```json
 {
   "isValid": true,
   "impossiblePrerequisites": [],
-  "reachabilityWarnings": [
-    {
-      "nodeId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-      "nodeName": "Final Capstone",
-      "prerequisiteId": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-      "prerequisiteName": "AI Capstone",
-      "riskyChoiceGroupName": "Major",
-      "description": "The prerequisite is only guaranteed if the participant picks a specific option."
-    }
-  ]
+  "reachabilityWarnings": []
 }
 ```
 
-### `POST /programs/{id}/simulate`
-Computes progress state based on a payload of completed step IDs and selected choice IDs.
-* **Returns:** The tree with a dynamically computed `status` per node (`unlocked`, `complete`, or `blocked`) and a `blockedReason` explaining why.
-
-**Example Request:**
-```json
-{
-  "choices": {
-    "44444444-4444-4444-4444-444444444444": [
-      "55555555-5555-5555-5555-555555555555"
-    ]
-  },
-  "completedStepIds": [
-    "66666666-6666-6666-6666-666666666666"
-  ]
-}
-```
-
-**Example Response:**
+**4. Simulate a Program**
+- **Method:** `POST /programs/{id}/simulate`
+- **Request Body:** `{ "choices": { "<choiceGroupId>": ["<pickedChildId>"] }, "completedStepIds": [] }`
+- **Response Body:** The program tree annotated with real-time `status` (unlocked, blocked, complete).
+- **Status:** 200 OK (or 400 Bad Request, 404 Not Found).
 ```json
 {
   "rootNode": {
-    "id": "22222222-2222-2222-2222-222222222222",
-    "name": "Computer Science",
+    "id": "4eec3b5e-04f8-4a92-be20-569611db844e",
+    "name": "Root",
     "nodeType": "group",
     "status": "unlocked",
     "blockedReason": null,
-    "children": []
+    "children": [
+      {
+        "id": "e14b8a24-9b57-45eb-89da-2244243b9ce7",
+        "name": "Final Capstone",
+        "nodeType": "step",
+        "status": "blocked",
+        "blockedReason": "Blocked: prerequisite 'Major' not yet complete.",
+        "children": []
+      }
+    ]
   }
 }
 ```
 
----
+## Validation Logic Explained
+The API runs two levels of validation:
+- **Impossible Prerequisites (Strictly Rejected):** Identifies cycles, self-references, or forward-references (e.g., trying to require a node that appears *after* the current node in a pre-order traversal). Programs with impossible prerequisites are completely rejected by the `isValid: false` flag.
+- **Reachability Warnings (Advisory):** Identifies soft logic flaws. For example, if the `Final Capstone` requires `AI Capstone` (which is nested deep inside a specific `Major` choice branch), participants who choose the Web branch will be permanently locked out of the Final Capstone. This produces a *Reachability Warning*. Conversely, if `Final Capstone` simply requires the parent `Major` choice group itself, this is universally safe. The algorithm intelligently excludes siblings in the same branch (e.g., `AI Capstone` requiring `Electives` within the same AI branch correctly generates no warning).
 
-## 🧠 Core Validation Logic
+## Frontend Guide
+The Angular SPA provides a dynamic UI to visually interact with the backend API. 
+- **Program Builder**: Build deep program trees visually using drag-and-drop principles and form controls. It includes a convenient "Load CS Example" button to quickly scaffold a complex curriculum.
+- **Program Viewer & Validator**: Read-only display of a created program, accompanied by a validation panel that executes the `/validate` endpoint and highlights Reachability Warnings or Impossible Prerequisites. 
 
-### Impossible Prerequisites (Blocks Program)
-Impossible prerequisites are hard validation errors (`isValid: false`).
-1. **Self Reference:** A node cannot depend on itself.
-2. **Descendant Reference:** A node cannot depend on one of its own descendants.
-3. **Forward Reference / Cycles:** A node cannot depend on a node that appears later or alongside it in the required completion sequence.
+**Demo Walkthrough:**
+1. Navigate to `http://localhost:4200`.
+2. Click "Load CS Example", then "Create Program". 
+3. The UI will jump to the Viewer. Click the "Validate Program" button. The panel should report a clean bill of health.
+4. Go back to the Builder, modify the Final Capstone's prerequisite to point directly at "AI Capstone" instead of "Major", and save.
+5. Re-run validation. You will now see a reachability warning appear!
 
-### Reachability Warnings (Advisory)
-Reachability warnings are advisory (`isValid: true`). They happen when a prerequisite target exists and is structurally possible, but sits inside a `choice` branch the participant might skip. 
-* *Example:* If `Final Capstone` requires `AI Capstone`, but `AI Capstone` is one of 3 choices in the `Major` group, a participant who chooses the `IT` track will permanently lock themselves out of the `Final Capstone`. This triggers a Reachability Warning.
+*(Note: The frontend features a "Known Programs" sidebar search. This is a client-side UX convenience powered by `localStorage` to save you from copying and pasting GUIDs; the backend remains strictly ID-based).*
 
----
+## AI Tool Usage
+Antigravity (an AI coding agent) was used to implement both the backend and frontend from a structured set of story-by-story prompts covering the domain model, API endpoints, prerequisite/reachability validators, tests, and UI. A running `PROJECT_CONTEXT.md` file was continuously maintained to ensure implementation decisions and architectural constraints remained consistent across AI sessions.
 
-## 💡 Using the Web UI
+## Design Decisions & Assumptions
+- **Temporary Keys for Resolution:** Because GUIDs are generated exclusively by the server during creation, clients assign a temporary string `key` to nodes in the `POST /programs` payload. References (`prerequisiteRef`) are resolved against these keys by the mapper to establish structural links.
+- **LCA (Lowest Common Ancestor) Validation:** Naively flagging any prerequisite inside a Choice branch causes false positives (e.g., a node requiring its immediate preceding sibling). The ReachabilityValidator uses an LCA walk-up algorithm to check if the prerequisite source and target strictly share the same path.
+- **In-Memory Storage:** The challenge uses a lightweight, dependency-free in-memory repository to minimize setup friction. In a production environment, this would be swapped out for EF Core (SQL Server / PostgreSQL).
+- **Future Enhancements:** If extended, this platform could support:
+  1. *Program Versioning*: Creating immutable snapshots of a program when participants are actively enrolled.
+  2. *Audit Trail*: Tracking the modification history of the program structure.
+  3. *Participant Simulation Mode*: Expanding the simulation API into an interactive frontend view where designers can "play-test" the tree by actively clicking through choices.
 
-1. Open `http://localhost:4200`
-2. Click **"⭐ Load Computer Science Example"** to instantly compose a large, pre-wired program structure based on the project spec.
-3. Click **Create Program**. You will be navigated to the Viewer Page.
-4. On the Viewer Page, click **Validate Program** to test the prerequisites.
-5. Click **Show Simulation**, tick off completed steps or choices, and click **Run Simulation** to see dynamic status badges (`complete`, `unlocked`, `blocked`) appear on the tree!
+## Known Limitations
+- No Authentication or Authorization.
+- Data is stored strictly in memory and will be lost if the API restarts.
+- The "Known Programs" search is a client-side local cache; there is no backend search index.
+- The simulate endpoint expects the user to correctly provide Choice branch selections.
 
----
+## Screenshots
 
-## 🚧 Known Limitations
+![Program Builder](docs/screenshots/builder.png)
+*Visual program tree builder.*
 
-- Storage is currently in-memory (Singleton repository). Data disappears when the API restarts.
-- No authentication, authorization, or multi-tenant architecture.
-- The Simulation API evaluates current progress, but does not persist participant state to a database.
-- Designed as a technical demonstration / take-home challenge baseline.
+![Program Viewer](docs/screenshots/viewer.png)
+*Program tree viewer and simulation UI.*
+
+![Validation Results](docs/screenshots/validation.png)
+*Reachability warning detection.*
