@@ -21,6 +21,14 @@ A program can contain concrete activities such as *sessions, tests, and submissi
 
 ---
 
+## 🤖 AI Tool Usage Note
+
+This project was built using AI collaboration tools:
+- **Claude** was used for high-level thinking, architecture design, and planning.
+- **Antigravity** (Google DeepMind's agentic coding assistant) was used for direct code implementation, scaffolding, testing, and debugging.
+
+---
+
 ## 🛠️ Setup Instructions
 
 **Prerequisites:**
@@ -113,19 +121,111 @@ Creates and stores a program in memory. Clients pass `key` as a string, and `pre
 * **Returns:** `201 Created` with the mapped tree and system-generated IDs.
 * **Validates:** Rejects malformed structures (e.g., duplicate keys, invalid pick counts).
 
+**Example Request:**
+```json
+{
+  "name": "Computer Science",
+  "rootGroup": {
+    "name": "Computer Science",
+    "groupRule": "inOrder",
+    "children": [
+      {
+        "type": "group",
+        "key": "Foundations",
+        "name": "Foundations",
+        "groupRule": "inOrder",
+        "children": [
+          { "type": "step", "name": "Intro to Computing", "stepType": "session" }
+        ]
+      },
+      {
+        "type": "group",
+        "key": "Major",
+        "name": "Major",
+        "groupRule": "choice",
+        "pickCount": 1,
+        "prerequisiteRef": "Foundations",
+        "children": [
+          { "type": "step", "name": "AI", "stepType": "session" },
+          { "type": "step", "name": "IT", "stepType": "session" }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ### `GET /programs/{id}`
 Retrieves a full recursive program tree by ID.
 * **Returns:** `200 OK`
+
+**Example Response:**
+```json
+{
+  "id": "11111111-1111-1111-1111-111111111111",
+  "name": "Computer Science",
+  "rootGroup": {
+    "id": "22222222-2222-2222-2222-222222222222",
+    "name": "Computer Science",
+    "groupRule": "inOrder",
+    "children": []
+  }
+}
+```
 
 ### `POST /programs/{id}/validate`
 Validates a program's structure for prerequisite issues.
 * **Returns:** `isValid` boolean, `impossiblePrerequisites` (blocking errors), and `reachabilityWarnings` (advisory warnings).
 
+**Example Response (Valid but Risky):**
+```json
+{
+  "isValid": true,
+  "impossiblePrerequisites": [],
+  "reachabilityWarnings": [
+    {
+      "nodeId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "nodeName": "Final Capstone",
+      "prerequisiteId": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+      "prerequisiteName": "AI Capstone",
+      "riskyChoiceGroupName": "Major",
+      "description": "The prerequisite is only guaranteed if the participant picks a specific option."
+    }
+  ]
+}
+```
+
 ### `POST /programs/{id}/simulate`
 Computes progress state based on a payload of completed step IDs and selected choice IDs.
 * **Returns:** The tree with a dynamically computed `status` per node (`unlocked`, `complete`, or `blocked`) and a `blockedReason` explaining why.
 
-*(See the `PROJECT_CONTEXT.md` or original code specifications for the exact full JSON payload examples).*
+**Example Request:**
+```json
+{
+  "choices": {
+    "44444444-4444-4444-4444-444444444444": [
+      "55555555-5555-5555-5555-555555555555"
+    ]
+  },
+  "completedStepIds": [
+    "66666666-6666-6666-6666-666666666666"
+  ]
+}
+```
+
+**Example Response:**
+```json
+{
+  "rootNode": {
+    "id": "22222222-2222-2222-2222-222222222222",
+    "name": "Computer Science",
+    "nodeType": "group",
+    "status": "unlocked",
+    "blockedReason": null,
+    "children": []
+  }
+}
+```
 
 ---
 
