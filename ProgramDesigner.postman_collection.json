@@ -1,0 +1,567 @@
+{
+  "info": {
+    "name": "ProgramDesigner",
+    "description": "Octo Education Challenge API Endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 - Core Endpoints",
+      "item": [
+        {
+          "name": "Create Program",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"programId\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Computer Science Degree\",\n  \"rootGroup\": {\n    \"name\": \"Core Curriculum\",\n    \"groupRule\": \"inOrder\",\n    \"children\": [\n      {\n        \"type\": \"step\",\n        \"name\": \"Intro to Programming\",\n        \"stepType\": \"session\",\n        \"key\": \"intro\"\n      },\n      {\n        \"type\": \"group\",\n        \"name\": \"Major Selection\",\n        \"groupRule\": \"choice\",\n        \"pickCount\": 1,\n        \"key\": \"major\",\n        \"children\": [\n          {\n            \"type\": \"group\",\n            \"name\": \"AI Track\",\n            \"groupRule\": \"inOrder\",\n            \"key\": \"ai\",\n            \"children\": [\n              {\n                \"type\": \"step\",\n                \"name\": \"Machine Learning\",\n                \"stepType\": \"session\",\n                \"key\": \"ml\"\n              },\n              {\n                \"type\": \"step\",\n                \"name\": \"AI Capstone\",\n                \"stepType\": \"test\",\n                \"key\": \"aiCap\",\n                \"prerequisiteRef\": \"ml\"\n              }\n            ]\n          },\n          {\n            \"type\": \"group\",\n            \"name\": \"Web Track\",\n            \"groupRule\": \"inOrder\",\n            \"key\": \"web\",\n            \"children\": [\n              {\n                \"type\": \"step\",\n                \"name\": \"Web Dev\",\n                \"stepType\": \"session\",\n                \"key\": \"webDev\"\n              },\n              {\n                \"type\": \"step\",\n                \"name\": \"Web Capstone\",\n                \"stepType\": \"test\",\n                \"key\": \"webCap\",\n                \"prerequisiteRef\": \"webDev\"\n              }\n            ]\n          }\n        ]\n      },\n      {\n        \"type\": \"step\",\n        \"name\": \"Final Capstone\",\n        \"stepType\": \"test\",\n        \"key\": \"final\",\n        \"prerequisiteRef\": \"major\"\n      }\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/programs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Program",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/{{programId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "{{programId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Validate Program",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/{{programId}}/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "{{programId}}",
+                "validate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Simulate Program",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"choices\": {},\n  \"completedStepIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/programs/{{programId}}/simulate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "{{programId}}",
+                "simulate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Required Challenge Scenarios",
+      "item": [
+        {
+          "name": "Full CS Scenario - Validates Clean",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const req = {",
+                  "  url: pm.environment.get(\"baseUrl\") + \"/programs\",",
+                  "  method: 'POST',",
+                  "  header: { 'Content-Type': 'application/json' },",
+                  "  body: { mode: 'raw', raw: JSON.stringify({\"name\":\"Computer Science Degree\",\"rootGroup\":{\"name\":\"Core Curriculum\",\"groupRule\":\"inOrder\",\"children\":[{\"type\":\"step\",\"name\":\"Intro to Programming\",\"stepType\":\"session\",\"key\":\"intro\"},{\"type\":\"group\",\"name\":\"Major Selection\",\"groupRule\":\"choice\",\"pickCount\":1,\"key\":\"major\",\"children\":[{\"type\":\"group\",\"name\":\"AI Track\",\"groupRule\":\"inOrder\",\"key\":\"ai\",\"children\":[{\"type\":\"step\",\"name\":\"Machine Learning\",\"stepType\":\"session\",\"key\":\"ml\"},{\"type\":\"step\",\"name\":\"AI Capstone\",\"stepType\":\"test\",\"key\":\"aiCap\",\"prerequisiteRef\":\"ml\"}]},{\"type\":\"group\",\"name\":\"Web Track\",\"groupRule\":\"inOrder\",\"key\":\"web\",\"children\":[{\"type\":\"step\",\"name\":\"Web Dev\",\"stepType\":\"session\",\"key\":\"webDev\"},{\"type\":\"step\",\"name\":\"Web Capstone\",\"stepType\":\"test\",\"key\":\"webCap\",\"prerequisiteRef\":\"webDev\"}]}]},{\"type\":\"step\",\"name\":\"Final Capstone\",\"stepType\":\"test\",\"key\":\"final\",\"prerequisiteRef\":\"major\"}]}}) }",
+                  "};",
+                  "pm.sendRequest(req, function (err, res) {",
+                  "  pm.environment.set(\"testId\", res.json().id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Is valid\", function () { pm.expect(jsonData.isValid).to.be.true; });",
+                  "pm.test(\"No impossible prerequisites\", function () { pm.expect(jsonData.impossiblePrerequisites.length).to.eql(0); });",
+                  "pm.test(\"No reachability warnings\", function () { pm.expect(jsonData.reachabilityWarnings.length).to.eql(0); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/{{testId}}/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "{{testId}}",
+                "validate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Direct Cycle - Rejected",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const body = {",
+                  "  name: \"Direct Cycle\",",
+                  "  rootGroup: {",
+                  "    name: \"Root\", groupRule: \"inOrder\", children: [",
+                  "      { type: \"step\", name: \"Step A\", stepType: \"session\", key: \"a\", prerequisiteRef: \"b\" },",
+                  "      { type: \"step\", name: \"Step B\", stepType: \"session\", key: \"b\", prerequisiteRef: \"a\" }",
+                  "    ]",
+                  "  }",
+                  "};",
+                  "const req = { url: pm.environment.get(\"baseUrl\") + \"/programs\", method: 'POST', header: { 'Content-Type': 'application/json' }, body: { mode: 'raw', raw: JSON.stringify(body) } };",
+                  "pm.sendRequest(req, function (err, res) { pm.environment.set(\"testId\", res.json().id); });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Is invalid\", function () { pm.expect(jsonData.isValid).to.be.false; });",
+                  "pm.test(\"Has impossible prerequisites\", function () { pm.expect(jsonData.impossiblePrerequisites.length).to.be.greaterThan(0); });",
+                  "pm.test(\"Reason includes forward reference\", function () {",
+                  "   const hasForward = jsonData.impossiblePrerequisites.some(p => p.reason === 'forwardReference');",
+                  "   pm.expect(hasForward).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/{{testId}}/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "{{testId}}",
+                "validate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Self-Reference - Rejected",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const body = {",
+                  "  name: \"Self Reference\",",
+                  "  rootGroup: {",
+                  "    name: \"Root\", groupRule: \"inOrder\", children: [",
+                  "      { type: \"step\", name: \"Self\", stepType: \"session\", key: \"self\", prerequisiteRef: \"self\" }",
+                  "    ]",
+                  "  }",
+                  "};",
+                  "const req = { url: pm.environment.get(\"baseUrl\") + \"/programs\", method: 'POST', header: { 'Content-Type': 'application/json' }, body: { mode: 'raw', raw: JSON.stringify(body) } };",
+                  "pm.sendRequest(req, function (err, res) { pm.environment.set(\"testId\", res.json().id); });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Is invalid\", function () { pm.expect(jsonData.isValid).to.be.false; });",
+                  "pm.test(\"Reason is selfReference\", function () { pm.expect(jsonData.impossiblePrerequisites[0].reason).to.eql('selfReference'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/{{testId}}/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "{{testId}}",
+                "validate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Choice Branch Prerequisite - Warning Not Rejection",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const body = {",
+                  "  name: \"Branch Warning\",",
+                  "  rootGroup: {",
+                  "    name: \"Root\", groupRule: \"inOrder\", children: [",
+                  "      {",
+                  "        type: \"group\", name: \"Major\", groupRule: \"choice\", pickCount: 1, key: \"major\", children: [",
+                  "          { type: \"group\", name: \"AI\", groupRule: \"inOrder\", children: [ { type: \"step\", name: \"AI Capstone\", stepType: \"test\", key: \"aiCap\" } ] }",
+                  "        ]",
+                  "      },",
+                  "      { type: \"step\", name: \"Final Capstone\", stepType: \"test\", key: \"final\", prerequisiteRef: \"aiCap\" }",
+                  "    ]",
+                  "  }",
+                  "};",
+                  "const req = { url: pm.environment.get(\"baseUrl\") + \"/programs\", method: 'POST', header: { 'Content-Type': 'application/json' }, body: { mode: 'raw', raw: JSON.stringify(body) } };",
+                  "pm.sendRequest(req, function (err, res) { pm.environment.set(\"testId\", res.json().id); });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Is valid\", function () { pm.expect(jsonData.isValid).to.be.true; });",
+                  "pm.test(\"Has reachability warning\", function () { pm.expect(jsonData.reachabilityWarnings.length).to.be.greaterThan(0); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/{{testId}}/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "{{testId}}",
+                "validate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Same-Branch Choice Prerequisite - Safe",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const body = {",
+                  "  name: \"Same Branch Safe\",",
+                  "  rootGroup: {",
+                  "    name: \"Root\", groupRule: \"inOrder\", children: [",
+                  "      {",
+                  "        type: \"group\", name: \"Major\", groupRule: \"choice\", pickCount: 1, key: \"major\", children: [",
+                  "          { type: \"group\", name: \"AI\", groupRule: \"inOrder\", children: [",
+                  "            { type: \"step\", name: \"Electives\", stepType: \"session\", key: \"elec\" },",
+                  "            { type: \"step\", name: \"AI Capstone\", stepType: \"test\", key: \"aiCap\", prerequisiteRef: \"elec\" }",
+                  "          ] }",
+                  "        ]",
+                  "      }",
+                  "    ]",
+                  "  }",
+                  "};",
+                  "const req = { url: pm.environment.get(\"baseUrl\") + \"/programs\", method: 'POST', header: { 'Content-Type': 'application/json' }, body: { mode: 'raw', raw: JSON.stringify(body) } };",
+                  "pm.sendRequest(req, function (err, res) { pm.environment.set(\"testId\", res.json().id); });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Is valid\", function () { pm.expect(jsonData.isValid).to.be.true; });",
+                  "pm.test(\"No reachability warnings\", function () { pm.expect(jsonData.reachabilityWarnings.length).to.eql(0); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/{{testId}}/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "{{testId}}",
+                "validate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Error Handling",
+      "item": [
+        {
+          "name": "Get Non-Existent Program",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/00000000-0000-0000-0000-000000000001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "00000000-0000-0000-0000-000000000001"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Validate Non-Existent Program",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/programs/00000000-0000-0000-0000-000000000001/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs",
+                "00000000-0000-0000-0000-000000000001",
+                "validate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Program - Invalid Choice PickCount",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Has errors\", function () { pm.expect(jsonData.errors.length).to.be.greaterThan(0); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bad PickCount\",\n  \"rootGroup\": {\n    \"name\": \"Root\",\n    \"groupRule\": \"choice\",\n    \"pickCount\": 5,\n    \"children\": [\n      {\n        \"type\": \"step\",\n        \"name\": \"A\",\n        \"stepType\": \"session\"\n      }\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/programs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Program - Unresolvable Prerequisite Reference",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () { pm.response.to.have.status(400); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Has errors\", function () { pm.expect(jsonData.errors.length).to.be.greaterThan(0); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bad Ref\",\n  \"rootGroup\": {\n    \"name\": \"Root\",\n    \"groupRule\": \"inOrder\",\n    \"children\": [\n      {\n        \"type\": \"step\",\n        \"name\": \"A\",\n        \"stepType\": \"session\",\n        \"prerequisiteRef\": \"missingKey\"\n      }\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/programs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "programs"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
