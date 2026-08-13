@@ -2,7 +2,7 @@ namespace ProgramDesigner.Core.Domain;
 
 public sealed record ProgramSimulationNode
 {
-    public required Guid Id { get; init; }
+    public required NodeId Id { get; init; }
     public required string Name { get; init; }
     public required NodeType NodeType { get; init; }
     public required SimulationStatus Status { get; init; }

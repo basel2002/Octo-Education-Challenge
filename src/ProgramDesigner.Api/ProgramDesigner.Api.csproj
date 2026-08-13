@@ -2,6 +2,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ProgramDesigner.Core\ProgramDesigner.Core.csproj" />
+    <ProjectReference Include="..\ProgramDesigner.Infrastructure\ProgramDesigner.Infrastructure.csproj" />
+    <ProjectReference Include="..\ProgramDesigner.Application\ProgramDesigner.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

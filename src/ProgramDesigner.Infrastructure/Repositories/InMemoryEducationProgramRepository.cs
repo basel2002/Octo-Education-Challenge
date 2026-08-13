@@ -1,7 +1,8 @@
-namespace ProgramDesigner.Core.Repositories;
+namespace ProgramDesigner.Infrastructure.Repositories;
 
 using System.Collections.Concurrent;
 using ProgramDesigner.Core.Domain;
+using ProgramDesigner.Core.Repositories;
 
 /// <summary>
 /// A simple thread-safe, in-memory implementation of <see cref="IEducationProgramRepository"/>.

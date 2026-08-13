@@ -6,8 +6,8 @@ public sealed class ProgramSimulationService
 {
     public (ProgramSimulationNode? RootNode, List<string> Errors) Simulate(
         EducationProgram program,
-        IReadOnlyDictionary<Guid, IReadOnlyCollection<Guid>> choices,
-        IReadOnlySet<Guid> completedStepIds)
+        IReadOnlyDictionary<NodeId, IReadOnlyCollection<NodeId>> choices,
+        IReadOnlySet<NodeId> completedStepIds)
     {
         var errors = ValidateChoices(program, choices);
         if (errors.Count > 0)
@@ -16,7 +16,7 @@ public sealed class ProgramSimulationService
         }
 
         var nodeMap = BuildNodeMap(program.RootGroup);
-        var completionMap = new Dictionary<Guid, bool>();
+        var completionMap = new Dictionary<NodeId, bool>();
         ComputeCompletion(program.RootGroup, choices, completedStepIds, completionMap);
 
         var root = BuildSimulationNode(
@@ -32,7 +32,7 @@ public sealed class ProgramSimulationService
 
     private static List<string> ValidateChoices(
         EducationProgram program,
-        IReadOnlyDictionary<Guid, IReadOnlyCollection<Guid>> choices)
+        IReadOnlyDictionary<NodeId, IReadOnlyCollection<NodeId>> choices)
     {
         var errors = new List<string>();
         var nodeMap = BuildNodeMap(program.RootGroup);
@@ -64,14 +64,14 @@ public sealed class ProgramSimulationService
         return errors;
     }
 
-    private static Dictionary<Guid, ProgramNode> BuildNodeMap(ProgramNode root)
+    private static Dictionary<NodeId, ProgramNode> BuildNodeMap(ProgramNode root)
     {
-        var nodeMap = new Dictionary<Guid, ProgramNode>();
+        var nodeMap = new Dictionary<NodeId, ProgramNode>();
         AddNode(root, nodeMap);
         return nodeMap;
     }
 
-    private static void AddNode(ProgramNode node, Dictionary<Guid, ProgramNode> nodeMap)
+    private static void AddNode(ProgramNode node, Dictionary<NodeId, ProgramNode> nodeMap)
     {
         nodeMap[node.Id] = node;
 
@@ -86,9 +86,9 @@ public sealed class ProgramSimulationService
 
     private static bool ComputeCompletion(
         ProgramNode node,
-        IReadOnlyDictionary<Guid, IReadOnlyCollection<Guid>> choices,
-        IReadOnlySet<Guid> completedStepIds,
-        Dictionary<Guid, bool> completionMap)
+        IReadOnlyDictionary<NodeId, IReadOnlyCollection<NodeId>> choices,
+        IReadOnlySet<NodeId> completedStepIds,
+        Dictionary<NodeId, bool> completionMap)
     {
         bool isComplete;
         if (node is StepNode)
@@ -113,8 +113,8 @@ public sealed class ProgramSimulationService
 
     private static int CountCompleteChosenChildren(
         GroupNode choiceGroup,
-        IReadOnlyDictionary<Guid, IReadOnlyCollection<Guid>> choices,
-        Dictionary<Guid, bool> completionMap)
+        IReadOnlyDictionary<NodeId, IReadOnlyCollection<NodeId>> choices,
+        Dictionary<NodeId, bool> completionMap)
     {
         if (!choices.TryGetValue(choiceGroup.Id, out var pickedChildIds))
         {
@@ -131,9 +131,9 @@ public sealed class ProgramSimulationService
         ProgramNode node,
         GroupNode? parent,
         ProgramNode? previousSibling,
-        IReadOnlyDictionary<Guid, IReadOnlyCollection<Guid>> choices,
-        IReadOnlyDictionary<Guid, ProgramNode> nodeMap,
-        IReadOnlyDictionary<Guid, bool> completionMap)
+        IReadOnlyDictionary<NodeId, IReadOnlyCollection<NodeId>> choices,
+        IReadOnlyDictionary<NodeId, ProgramNode> nodeMap,
+        IReadOnlyDictionary<NodeId, bool> completionMap)
     {
         var status = GetStatus(node, parent, previousSibling, choices, nodeMap, completionMap, out var blockedReason);
         var children = new List<ProgramSimulationNode>();
@@ -163,9 +163,9 @@ public sealed class ProgramSimulationService
         ProgramNode node,
         GroupNode? parent,
         ProgramNode? previousSibling,
-        IReadOnlyDictionary<Guid, IReadOnlyCollection<Guid>> choices,
-        IReadOnlyDictionary<Guid, ProgramNode> nodeMap,
-        IReadOnlyDictionary<Guid, bool> completionMap,
+        IReadOnlyDictionary<NodeId, IReadOnlyCollection<NodeId>> choices,
+        IReadOnlyDictionary<NodeId, ProgramNode> nodeMap,
+        IReadOnlyDictionary<NodeId, bool> completionMap,
         out string? blockedReason)
     {
         blockedReason = null;

@@ -1,6 +1,6 @@
-namespace ProgramDesigner.Api.Mapping;
+namespace ProgramDesigner.Application.Mapping;
 
-using ProgramDesigner.Api.Dto;
+using ProgramDesigner.Application.Dto;
 using ProgramDesigner.Core.Domain;
 
 public sealed class ProgramMapper
@@ -96,9 +96,9 @@ public sealed class ProgramMapper
         {
             return new StepNode
             {
-                Id = id,
+                Id = new NodeId(id),
                 Name = stepReq.Name,
-                PrerequisiteId = prereqId,
+                PrerequisiteId = prereqId.HasValue ? new NodeId(prereqId.Value) : null,
                 StepType = stepReq.StepType
             };
         }
@@ -116,9 +116,9 @@ public sealed class ProgramMapper
 
             return new GroupNode
             {
-                Id = id,
+                Id = new NodeId(id),
                 Name = groupReq.Name,
-                PrerequisiteId = prereqId,
+                PrerequisiteId = prereqId.HasValue ? new NodeId(prereqId.Value) : null,
                 GroupRule = groupReq.GroupRule,
                 PickCount = groupReq.PickCount,
                 Children = children
@@ -131,7 +131,7 @@ public sealed class ProgramMapper
 
     public ProgramResponse MapToResponse(EducationProgram program)
     {
-        var idToNameMap = new Dictionary<Guid, string>();
+        var idToNameMap = new Dictionary<NodeId, string>();
         CollectNames(program.RootGroup, idToNameMap);
 
         return new ProgramResponse
@@ -142,7 +142,7 @@ public sealed class ProgramMapper
         };
     }
 
-    private void CollectNames(ProgramNode node, Dictionary<Guid, string> idToNameMap)
+    private void CollectNames(ProgramNode node, Dictionary<NodeId, string> idToNameMap)
     {
         idToNameMap[node.Id] = node.Name;
         
@@ -155,7 +155,7 @@ public sealed class ProgramMapper
         }
     }
 
-    private ProgramNodeResponse MapNodeResponse(ProgramNode node, Dictionary<Guid, string> idToNameMap)
+    private ProgramNodeResponse MapNodeResponse(ProgramNode node, Dictionary<NodeId, string> idToNameMap)
     {
         string? prereqName = null;
         if (node.PrerequisiteId.HasValue)
@@ -167,9 +167,9 @@ public sealed class ProgramMapper
         {
             return new StepNodeResponse
             {
-                Id = stepNode.Id,
+                Id = stepNode.Id.Value,
                 Name = stepNode.Name,
-                PrerequisiteId = stepNode.PrerequisiteId,
+                PrerequisiteId = stepNode.PrerequisiteId?.Value,
                 PrerequisiteName = prereqName,
                 StepType = stepNode.StepType
             };
@@ -178,9 +178,9 @@ public sealed class ProgramMapper
         {
             return new GroupNodeResponse
             {
-                Id = groupNode.Id,
+                Id = groupNode.Id.Value,
                 Name = groupNode.Name,
-                PrerequisiteId = groupNode.PrerequisiteId,
+                PrerequisiteId = groupNode.PrerequisiteId?.Value,
                 PrerequisiteName = prereqName,
                 GroupRule = groupNode.GroupRule,
                 PickCount = groupNode.PickCount,
@@ -201,20 +201,20 @@ public sealed class ProgramMapper
             IsValid = isValid,
             ImpossiblePrerequisites = impossiblePrereqs.Select(ip => new ImpossiblePrerequisiteResponse
             {
-                NodeId = ip.NodeId,
+                NodeId = ip.NodeId.Value,
                 NodeName = ip.NodeName,
-                PrerequisiteId = ip.PrerequisiteId,
+                PrerequisiteId = ip.PrerequisiteId.Value,
                 PrerequisiteName = ip.PrerequisiteName,
                 Reason = ip.Reason,
                 Description = ip.Description
             }).ToList(),
             ReachabilityWarnings = reachabilityWarnings.Select(rw => new ReachabilityWarningResponse
             {
-                NodeId = rw.NodeId,
+                NodeId = rw.NodeId.Value,
                 NodeName = rw.NodeName,
-                PrerequisiteId = rw.PrerequisiteId,
+                PrerequisiteId = rw.PrerequisiteId.Value,
                 PrerequisiteName = rw.PrerequisiteName,
-                RiskyChoiceGroupId = rw.RiskyChoiceGroupId,
+                RiskyChoiceGroupId = rw.RiskyChoiceGroupId.Value,
                 RiskyChoiceGroupName = rw.RiskyChoiceGroupName,
                 Description = rw.Description
             }).ToList()
@@ -233,7 +233,7 @@ public sealed class ProgramMapper
     {
         return new ProgramSimulationNodeResponse
         {
-            Id = node.Id,
+            Id = node.Id.Value,
             Name = node.Name,
             NodeType = node.NodeType,
             Status = node.Status,

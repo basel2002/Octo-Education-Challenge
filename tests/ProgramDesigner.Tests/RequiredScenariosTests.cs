@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Testing;
-using ProgramDesigner.Api.Dto;
+using ProgramDesigner.Application.Dto;
 using ProgramDesigner.Core.Domain;
 using ProgramDesigner.Core.Services;
 using ProgramDesigner.Core.Validators;
@@ -66,8 +66,8 @@ public class RequiredScenariosTests
 
         Assert.False(isValid);
         var cycleEntry = Assert.Single(impossiblePrerequisites);
-        Assert.Equal(aId, cycleEntry.NodeId);
-        Assert.Equal(bId, cycleEntry.PrerequisiteId);
+        Assert.Equal((Guid)aId, (Guid)cycleEntry.NodeId);
+        Assert.Equal((Guid)bId, (Guid)cycleEntry.PrerequisiteId);
         Assert.Equal(ImpossiblePrerequisiteReason.ForwardReference, cycleEntry.Reason);
         Assert.Contains("appears later", cycleEntry.Description);
     }
@@ -156,8 +156,8 @@ public class RequiredScenariosTests
 
         Assert.False(isValid);
         var selfReference = Assert.Single(impossiblePrerequisites);
-        Assert.Equal(stepId, selfReference.NodeId);
-        Assert.Equal(stepId, selfReference.PrerequisiteId);
+        Assert.Equal((Guid)stepId, (Guid)selfReference.NodeId);
+        Assert.Equal((Guid)stepId, (Guid)selfReference.PrerequisiteId);
         Assert.Equal(ImpossiblePrerequisiteReason.SelfReference, selfReference.Reason);
     }
 

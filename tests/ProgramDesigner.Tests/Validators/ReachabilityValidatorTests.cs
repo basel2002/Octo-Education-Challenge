@@ -98,7 +98,7 @@ public class ReachabilityValidatorTests
         var warnings = _validator.FindReachabilityWarnings(program);
         
         Assert.Single(warnings);
-        Assert.Equal(majorId, warnings[0].RiskyChoiceGroupId);
+        Assert.Equal(majorId, warnings[0].RiskyChoiceGroupId.Value);
         Assert.Equal("Major", warnings[0].RiskyChoiceGroupName);
     }
 
@@ -204,7 +204,7 @@ public class ReachabilityValidatorTests
         var warnings = _validator.FindReachabilityWarnings(program);
         
         Assert.Single(warnings);
-        Assert.Equal(electivesId, warnings[0].RiskyChoiceGroupId);
+        Assert.Equal(electivesId, warnings[0].RiskyChoiceGroupId.Value);
         Assert.Equal("Electives", warnings[0].RiskyChoiceGroupName);
     }
 }

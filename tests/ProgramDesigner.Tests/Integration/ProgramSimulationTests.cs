@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Testing;
-using ProgramDesigner.Api.Dto;
+using ProgramDesigner.Application.Dto;
 using ProgramDesigner.Core.Domain;
 
 public class ProgramSimulationTests

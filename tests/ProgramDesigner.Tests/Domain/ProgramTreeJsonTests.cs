@@ -42,7 +42,7 @@ public sealed class ProgramTreeJsonTests
     // ─────────────────────────────────────────────────────────────────────
     private static EducationProgram BuildSampleProgram()
     {
-        var orientationId = Guid.NewGuid();
+        var orientationId = NodeId.NewNodeId();
 
         var innerGroup = new GroupNode
         {

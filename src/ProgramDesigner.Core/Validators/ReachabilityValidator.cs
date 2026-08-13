@@ -8,8 +8,8 @@ public class ReachabilityValidator
 {
     public IReadOnlyList<ReachabilityWarning> FindReachabilityWarnings(EducationProgram program)
     {
-        var nodeMap = new Dictionary<Guid, ProgramNode>();
-        var parentMap = new Dictionary<Guid, GroupNode>();
+        var nodeMap = new Dictionary<NodeId, ProgramNode>();
+        var parentMap = new Dictionary<NodeId, GroupNode>();
 
         // Pass 1: Build maps
         BuildMaps(program.RootGroup, null, nodeMap, parentMap);
@@ -70,7 +70,7 @@ public class ReachabilityValidator
         return warnings;
     }
 
-    private void BuildMaps(ProgramNode node, GroupNode? parent, Dictionary<Guid, ProgramNode> nodeMap, Dictionary<Guid, GroupNode> parentMap)
+    private void BuildMaps(ProgramNode node, GroupNode? parent, Dictionary<NodeId, ProgramNode> nodeMap, Dictionary<NodeId, GroupNode> parentMap)
     {
         nodeMap[node.Id] = node;
         if (parent != null)
@@ -87,7 +87,7 @@ public class ReachabilityValidator
         }
     }
 
-    private bool IsDescendantOrSelf(ProgramNode node, ProgramNode possibleAncestor, Dictionary<Guid, GroupNode> parentMap)
+    private bool IsDescendantOrSelf(ProgramNode node, ProgramNode possibleAncestor, Dictionary<NodeId, GroupNode> parentMap)
     {
         var current = node;
         while (current != null)

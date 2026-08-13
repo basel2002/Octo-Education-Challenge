@@ -1,4 +1,4 @@
-namespace ProgramDesigner.Api.Dto;
+namespace ProgramDesigner.Application.Dto;
 
 using System.Text.Json.Serialization;
 using ProgramDesigner.Core.Domain;

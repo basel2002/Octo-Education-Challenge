@@ -55,7 +55,7 @@ public abstract class ProgramNode
     /// Unique, stable identifier for this node within its program tree.
     /// Used by <see cref="PrerequisiteId"/> references.
     /// </summary>
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public NodeId Id { get; init; } = NodeId.NewNodeId();
 
     /// <summary>
     /// Human-readable label shown to the program designer and participants.
@@ -90,5 +90,5 @@ public abstract class ProgramNode
     /// and does not create a cycle) is validated by dedicated prerequisite-
     /// validation logic in a later story — not here.
     /// </remarks>
-    public Guid? PrerequisiteId { get; init; }
+    public NodeId? PrerequisiteId { get; init; }
 }

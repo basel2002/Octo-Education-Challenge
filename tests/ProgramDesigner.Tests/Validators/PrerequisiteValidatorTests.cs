@@ -48,8 +48,8 @@ public class PrerequisiteValidatorTests
         // Assert
         Assert.Single(result);
         Assert.Equal(ImpossiblePrerequisiteReason.DescendantReference, result[0].Reason);
-        Assert.Equal(groupId, result[0].NodeId);
-        Assert.Equal(stepId, result[0].PrerequisiteId);
+        Assert.Equal(groupId, result[0].NodeId.Value);
+        Assert.Equal(stepId, result[0].PrerequisiteId.Value);
     }
 
     [Fact]
@@ -81,8 +81,8 @@ public class PrerequisiteValidatorTests
         // Assert
         Assert.Single(result);
         Assert.Equal(ImpossiblePrerequisiteReason.ForwardReference, result[0].Reason);
-        Assert.Equal(step1Id, result[0].NodeId);
-        Assert.Equal(step2Id, result[0].PrerequisiteId);
+        Assert.Equal(step1Id, result[0].NodeId.Value);
+        Assert.Equal(step2Id, result[0].PrerequisiteId.Value);
     }
 
     [Fact]

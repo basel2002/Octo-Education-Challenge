@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
-using ProgramDesigner.Api.Mapping;
+using ProgramDesigner.Application.Mapping;
+using ProgramDesigner.Application.Services;
 using ProgramDesigner.Core.Repositories;
+using ProgramDesigner.Infrastructure.Repositories;
 using ProgramDesigner.Core.Services;
 using ProgramDesigner.Core.Validators;
 
@@ -16,6 +18,10 @@ builder.Services.AddControllers()
 
 builder.Services.AddSingleton<IEducationProgramRepository, InMemoryEducationProgramRepository>();
 builder.Services.AddSingleton<ProgramMapper>();
+builder.Services.AddSingleton<CreateProgramService>();
+builder.Services.AddSingleton<GetProgramService>();
+builder.Services.AddSingleton<ValidateProgramService>();
+builder.Services.AddSingleton<SimulateProgramAppService>();
 
 // Add validation services
 builder.Services.AddTransient<PrerequisiteValidator>();

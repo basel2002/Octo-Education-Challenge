@@ -7,9 +7,9 @@ public class PrerequisiteValidator
 {
     public IReadOnlyList<ImpossiblePrerequisite> FindImpossiblePrerequisites(EducationProgram program)
     {
-        var descendantsMap = new Dictionary<Guid, HashSet<Guid>>();
-        var preOrderIndices = new Dictionary<Guid, int>();
-        var names = new Dictionary<Guid, string>();
+        var descendantsMap = new Dictionary<NodeId, HashSet<NodeId>>();
+        var preOrderIndices = new Dictionary<NodeId, int>();
+        var names = new Dictionary<NodeId, string>();
         
         var currentIndex = 0;
         
@@ -24,18 +24,18 @@ public class PrerequisiteValidator
         return results;
     }
 
-    private HashSet<Guid> BuildMaps(
+    private HashSet<NodeId> BuildMaps(
         ProgramNode node, 
         ref int currentIndex, 
-        Dictionary<Guid, HashSet<Guid>> descendantsMap, 
-        Dictionary<Guid, int> preOrderIndices, 
-        Dictionary<Guid, string> names)
+        Dictionary<NodeId, HashSet<NodeId>> descendantsMap, 
+        Dictionary<NodeId, int> preOrderIndices, 
+        Dictionary<NodeId, string> names)
     {
         var thisIndex = currentIndex++;
         preOrderIndices[node.Id] = thisIndex;
         names[node.Id] = node.Name;
         
-        var descendants = new HashSet<Guid>();
+        var descendants = new HashSet<NodeId>();
         
         if (node is GroupNode group)
         {
@@ -53,9 +53,9 @@ public class PrerequisiteValidator
 
     private void CheckPrerequisites(
         ProgramNode node, 
-        Dictionary<Guid, HashSet<Guid>> descendantsMap, 
-        Dictionary<Guid, int> preOrderIndices, 
-        Dictionary<Guid, string> names, 
+        Dictionary<NodeId, HashSet<NodeId>> descendantsMap, 
+        Dictionary<NodeId, int> preOrderIndices, 
+        Dictionary<NodeId, string> names, 
         List<ImpossiblePrerequisite> results)
     {
         if (node.PrerequisiteId.HasValue)

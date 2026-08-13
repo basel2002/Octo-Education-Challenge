@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Testing;
-using ProgramDesigner.Api.Dto;
+using ProgramDesigner.Application.Dto;
 using ProgramDesigner.Core.Domain;
 using Xunit;
 
@@ -159,7 +159,7 @@ public class ProgramsControllerTests : IClassFixture<WebApplicationFactory<Progr
     {
         // Arrange
         var client = _factory.CreateClient();
-        var randomId = Guid.NewGuid();
+        var randomId = NodeId.NewNodeId();
 
         // Act
         var getResponse = await client.GetAsync($"/programs/{randomId}");
@@ -174,7 +174,7 @@ public class ProgramsControllerTests : IClassFixture<WebApplicationFactory<Progr
     public async Task ValidateProgram_InvalidId_Returns404NotFound()
     {
         var client = _factory.CreateClient();
-        var randomId = Guid.NewGuid();
+        var randomId = NodeId.NewNodeId();
 
         var validateResponse = await client.PostAsync($"/programs/{randomId}/validate", null);
 
