@@ -218,10 +218,13 @@ Antigravity (an AI coding agent) was utilized to construct both the backend and 
 ## 11. Screenshots
 
 ### Program Builder
-![Program Builder](docs/screenshots/builder.png)
+![Program Builder]<img width="1050" height="900" alt="image" src="https://github.com/user-attachments/assets/b41afb6c-f5c6-46e4-ab74-ba9fd69fe9cf" />
+
 
 ### Viewer & Simulation
-![Program Viewer](docs/screenshots/viewer.png)
+![Program Viewer]<img width="1278" height="895" alt="image" src="https://github.com/user-attachments/assets/fd87e635-6d32-48a2-915e-d048d06ec12b" />
+
 
 ### Validation Warnings
-![Validation Warnings](docs/screenshots/validation.png)
+![Validation Warnings]<img width="1316" height="324" alt="image" src="https://github.com/user-attachments/assets/ba2246dd-bb9b-4762-a63f-7e8168ac2c95" />
+
