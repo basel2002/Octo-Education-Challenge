@@ -3,7 +3,25 @@
 ## 1. Overview
 ProgramDesigner is an education-management tool designed for education program designers. It allows users to build, view, validate, and simulate complex, recursive program structures. Programs consist of sequential or choice-based groups of steps (like sessions, tests, or submissions), and include prerequisite definitions to map out the required learning paths. 
 
-## 2. Setup & Run Instructions
+## 2. Assumptions Made Beyond the Spec
+Because the challenge required concrete implementation decisions, the following assumptions were made:
+- **Prerequisite Resolution**: Clients supply temporary string `key` and `prerequisiteRef` properties. The server converts these into permanent `NodeId` references during creation, avoiding the need for clients to guess GUIDs.
+- **`isValid` Definition**: A program is only deemed invalid if it contains impossible prerequisites. Reachability warnings are considered advisory only, per spec guidelines.
+- **Forward-Reference Rules**: "Appearing later" is formally defined mathematically using a node's pre-order traversal index in the tree structure.
+- **LCA-Exclusion Reachability**: A prerequisite located inside a `Choice` branch is only flagged as risky if the dependent node does *not* share that same branch. Without this "Lowest Common Ancestor" logic, the CS example's `AI Capstone -> Electives` valid path would trigger false positives.
+- **In-Memory Storage**: The repository pattern uses a singleton dictionary. Data will reset upon API restart. This scopes the take-home to domain logic rather than database management.
+- **No Authorization**: The API is completely open, devoid of authentication middleware or ownership concepts.
+- **Client-side Search**: The name-search feature was intentionally kept strictly in the frontend cache to prevent scope creep on the backend API requirements.
+
+## 3. Business Improvements & Extension Ideas
+To transition this concept into a production-grade platform, several extensions would be vital:
+- **Program Versioning**: Programs should become immutable once participants enroll. Editing a live program could corrupt progress tracking; updates should require publishing a new version.
+- **"Preview as Participant"**: Adding a dedicated sandbox mode to let designers run through their own program layout as a student, seeing exactly when steps unlock.
+- **Analytics Engine**: Tracking aggregate completion rates to identify where students actually stall. This would contextualize reachability warnings with real-world dropout data.
+- **Persistent Storage & Multi-Tenancy**: Replacing the in-memory cache with an EF Core relational database (e.g., PostgreSQL/SQL Server) with tenant segregation, allowing multiple institutions to manage independent catalogs.
+- **Draft States**: Permitting programs to be saved incrementally in a "Draft" status before validating and "Publishing", removing the friction of needing a perfectly valid tree on the first save.
+
+## 4. Setup & Run Instructions
 
 ### Prerequisites
 - **.NET SDK**: `10.0` or higher
@@ -43,7 +61,7 @@ A pre-configured Postman collection is included in the repository root for testi
 - Ensure the **Local** environment is active so the `{{baseUrl}}` variable correctly points to `http://localhost:5173`.
 - The collection contains pre-built requests for creating programs (including the Computer Science scenario), viewing, validating, and simulating them.
 
-## 3. Data Model Explanation
+## 5. Data Model Explanation
 The domain model uses a recursive composite pattern built around `ProgramNode`. A `StepNode` represents a concrete leaf activity (e.g., a "session" or "test"), while a `GroupNode` acts as a container applying a specific rule: either `InOrder` (all children must be completed sequentially) or `Choice` (pick N children). 
 
 Because any node can be a prerequisite for any other node, the model uses `NodeId` references. To support polymorphism in API requests, JSON payloads use a discriminator field (`"type": "group"` or `"type": "step"`). During program creation, clients use temporary `key` properties to define internal references (`prerequisiteRef`), which the backend resolves into strictly typed `NodeId` GUIDs.
@@ -86,7 +104,7 @@ Because any node can be a prerequisite for any other node, the model uses `NodeI
 }
 ```
 
-## 4. API Contract
+## 6. API Contract
 
 ### `POST /programs`
 Creates a new program, resolving temporary keys to generated GUIDs.
@@ -164,7 +182,7 @@ Simulates a participant's progress given their chosen paths and completed steps.
 }
 ```
 
-## 5. Validation Logic Explained
+## 7. Validation Logic Explained
 
 The backend enforces two distinct classes of prerequisite validation:
 
@@ -177,7 +195,7 @@ These flag paths that *might* become dead ends depending on a participant's choi
 - **Safe Example**: `AI Capstone` requires `Electives`, and both live inside the *same* `Choice` branch. Since selecting the branch includes both, this is perfectly fine and generates no warnings.
 - **Risky Example**: `Final Capstone` (a required global node) requires `AI Capstone` (an optional choice node). If the student selects `Electives` instead of `AI Capstone`, they will forever be locked out of the `Final Capstone`. The validator will issue a reachability warning.
 
-## 6. Frontend Application
+## 8. Frontend Application
 The Angular SPA provides a visual interface for creating and reviewing programs.
 - **Builder View**: Visually constructs nested node trees using a dynamic form, mapping directly to the API's creation schema.
 - **Viewer & Simulator**: Renders saved programs as an interactive tree.
@@ -189,26 +207,8 @@ The Angular SPA provides a visual interface for creating and reviewing programs.
   5. Save and click **Validate** again. A reachability warning will now clearly display, warning that the Capstone depends on an optional choice.
 - **Search Box**: The UI includes a convenient name-search bar in the header. Note that this feature is client-side only (caching program IDs in `localStorage`) as a UX enhancement; the actual API remains exclusively GUID-based.
 
-## 7. AI Tool Usage
+## 9. AI Tool Usage
 Antigravity (an AI coding agent) was utilized to construct both the backend and frontend. Development followed a structured, story-by-story sequence covering the core domain model, API endpoints, the complex prerequisite/reachability validators, extensive unit testing, and the Angular UI. To maintain strict architectural consistency across disjointed sessions, an internal `PROJECT_CONTEXT.md` document served as persistent memory for the AI.
-
-## 8. Assumptions Made Beyond the Spec
-Because the challenge required concrete implementation decisions, the following assumptions were made:
-- **Prerequisite Resolution**: Clients supply temporary string `key` and `prerequisiteRef` properties. The server converts these into permanent `NodeId` references during creation, avoiding the need for clients to guess GUIDs.
-- **`isValid` Definition**: A program is only deemed invalid if it contains impossible prerequisites. Reachability warnings are considered advisory only, per spec guidelines.
-- **Forward-Reference Rules**: "Appearing later" is formally defined mathematically using a node's pre-order traversal index in the tree structure.
-- **LCA-Exclusion Reachability**: A prerequisite located inside a `Choice` branch is only flagged as risky if the dependent node does *not* share that same branch. Without this "Lowest Common Ancestor" logic, the CS example's `AI Capstone -> Electives` valid path would trigger false positives.
-- **In-Memory Storage**: The repository pattern uses a singleton dictionary. Data will reset upon API restart. This scopes the take-home to domain logic rather than database management.
-- **No Authorization**: The API is completely open, devoid of authentication middleware or ownership concepts.
-- **Client-side Search**: The name-search feature was intentionally kept strictly in the frontend cache to prevent scope creep on the backend API requirements.
-
-## 9. Business Improvements & Extension Ideas
-To transition this concept into a production-grade platform, several extensions would be vital:
-- **Program Versioning**: Programs should become immutable once participants enroll. Editing a live program could corrupt progress tracking; updates should require publishing a new version.
-- **"Preview as Participant"**: Adding a dedicated sandbox mode to let designers run through their own program layout as a student, seeing exactly when steps unlock.
-- **Analytics Engine**: Tracking aggregate completion rates to identify where students actually stall. This would contextualize reachability warnings with real-world dropout data.
-- **Persistent Storage & Multi-Tenancy**: Replacing the in-memory cache with an EF Core relational database (e.g., PostgreSQL/SQL Server) with tenant segregation, allowing multiple institutions to manage independent catalogs.
-- **Draft States**: Permitting programs to be saved incrementally in a "Draft" status before validating and "Publishing", removing the friction of needing a perfectly valid tree on the first save.
 
 ## 10. Known Limitations
 - **Data Persistence**: All programs are lost when the API process stops.
